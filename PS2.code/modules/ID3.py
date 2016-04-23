@@ -177,14 +177,10 @@ def gain_ratio_nominal(data_set, attribute):
     H_sub_total = 0.0
     total = len(data_set)
 
-    dict = {}
+    dict = split_on_nominal(data_set, attribute)
 
-    for data in data_set:
-        key = data[attribute]
-        dict[key] = 1
-
-    for key, _ in dict.items():
-        sub = [data for data in data_set if data[attribute] == key]
+    for key, val in dict.items():
+        sub = val
         sub_total = len(sub)
         H_sub = entropy(sub)
         H_sub_total += H_sub * sub_total / total
@@ -234,8 +230,7 @@ def gain_ratio_numeric(data_set, attribute, steps):
     for i in range(total):
         if i % steps == 0:
             thresh = data_set[i][attribute]
-            sub1 = [data for data in data_set if data[attribute] < thresh]
-            sub2 = [data for data in data_set if data[attribute] >= thresh]]
+            sub1, sub2 = split_on_numerical(data_set, attribute, thresh)
             IG = HEx - entropy(sub1) - entropy(sub2)
             piv1 = float(len(sub1)) / total
             piv2 = float(len(sub2)) / total
@@ -266,7 +261,16 @@ def split_on_nominal(data_set, attribute):
     ========================================================================================================
     '''
     # Your code here
-    pass
+    split = {}
+
+    for data in data_set:
+        key = data[attribute]
+        if split.has_key(key):
+            split[key].append(data)
+        else:
+            split[key] = [data]
+
+    return split
 # ======== Test case =============================
 # data_set, attr = [[0, 4], [1, 3], [1, 2], [0, 0], [0, 0], [0, 4], [1, 4], [0, 2], [1, 2], [0, 1]], 1
 # split_on_nominal(data_set, attr) == {0: [[0, 0], [0, 0]], 1: [[0, 1]], 2: [[1, 2], [0, 2], [1, 2]], 3: [[1, 3]], 4: [[0, 4], [0, 4], [1, 4]]}
@@ -285,7 +289,13 @@ def split_on_numerical(data_set, attribute, splitting_value):
     ========================================================================================================
     '''
     # Your code here
-    pass
+    split = {}
+
+    sub1 = [data for data in data_set if data[attribute] < splitting_value]
+    sub2 = [data for data in data_set if data[attribute] >= splitting_value]
+    split = (sub1, sub2)
+
+    return split
 # ======== Test case =============================
 # d_set,a,sval = [[1, 0.25], [1, 0.89], [0, 0.93], [0, 0.48], [1, 0.19], [1, 0.49], [0, 0.6], [0, 0.6], [1, 0.34], [1, 0.19]],1,0.48
 # split_on_numerical(d_set,a,sval) == ([[1, 0.25], [1, 0.19], [1, 0.34], [1, 0.19]],[[1, 0.89], [0, 0.93], [0, 0.48], [1, 0.49], [0, 0.6], [0, 0.6]])
