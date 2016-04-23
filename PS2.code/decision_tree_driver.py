@@ -28,13 +28,15 @@ options = {
 def decision_tree_driver(train, validate = False, predict = False, prune = False,
     limit_splits_on_numerical = False, limit_depth = False, print_tree = False,
     print_dnf = False, learning_curve = False):
-    
+
     train_set, attribute_metadata = parse(train, False)
+    print train_set
+    return
     if limit_splits_on_numerical != False:
         numerical_splits_count = [limit_splits_on_numerical] * len(attribute_metadata)
     else:
         numerical_splits_count = [float("inf")] * len(attribute_metadata)
-        
+
     if limit_depth != False:
         depth = limit_depth
     else:
@@ -89,7 +91,7 @@ def decision_tree_driver(train, validate = False, predict = False, prune = False
     if learning_curve and validate:
         print '###\n#  Generating Learning Curve\n###'
         iterations = 20 # number of times to test each size
-        get_graph(train_set, attribute_metadata, validate_set, 
+        get_graph(train_set, attribute_metadata, validate_set,
             numerical_splits_count, depth, 5, 0, learning_curve['upper_bound'],
             learning_curve['increment'])
         print ''

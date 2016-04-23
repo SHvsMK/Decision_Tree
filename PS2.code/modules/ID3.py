@@ -9,6 +9,8 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
     given in lecture.
     '''
     # Your code here
+    if len(data_set) == 0:
+        return
     pass
 
 def check_homogenous(data_set):
@@ -22,7 +24,19 @@ def check_homogenous(data_set):
     ========================================================================================================
     '''
     # Your code here
-    pass
+
+    #Load the attribute at index 0
+    attr_val = data_set[0][0]
+
+    #Compare every item's attribute with attr_val
+    for data in data_set:
+        if data[0] != attr_val:
+            attr_val = None
+            break
+
+    #Return attr_val
+    return attr_val
+
 # ======== Test Cases =============================
 # data_set = [[0],[1],[1],[1],[1],[1]]
 # check_homogenous(data_set) ==  None
@@ -68,7 +82,33 @@ def mode(data_set):
     ========================================================================================================
     '''
     # Your code here
-    pass
+
+    #Use a dictionary to save the count of possible classifications
+    dict = {}
+
+    #Use to store the mode
+    classification = None
+    maxm = 0
+
+    #Count the possible classifications
+    for data in data_set:
+        key = data[0]
+        if dict.has_key(key):
+            dict[key] +=1
+        else:
+            dict[key] = 1
+
+    #Get the classification which counts most
+    for key, val in dict.items():
+        if classification == None:
+            classification = key
+            maxm = val
+        else:
+            if val > maxm:
+                classification = key
+                maxm = val
+
+    return classification
 # ======== Test case =============================
 # data_set = [[0],[1],[1],[1],[1],[1]]
 # mode(data_set) == 1
@@ -85,6 +125,29 @@ def entropy(data_set):
     Output: Returns entropy. Number between 0-1. See Textbook for formula
     ========================================================================================================
     '''
+    #Save the count of data_set
+    total = len(data_set)
+
+    #Save the count of possible classifications
+    dict = {}
+
+    #Inital entropy value
+    entropy_val = 0.0
+
+    #Count the possible classifications
+    for data in data_set:
+        key = data[0]
+        if dict.has_key(key):
+            dict[key] += 1
+        else:
+            dict[key] = 1
+
+    #Compute the entropy value
+    for _, val in dict.items():
+        pi = float(val) / total
+        entropy_val += pi * math.log(pi, 2)
+
+    return -entropy_val
 
 
 # ======== Test case =============================
