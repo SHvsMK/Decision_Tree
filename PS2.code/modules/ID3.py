@@ -58,7 +58,28 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
     ========================================================================================================
     '''
     # Your code here
-    pass
+    maxm = 0.0
+    attri = 0
+    split = 0.0
+
+    for i in range(1, len(attribute_metadata)):
+        if attribute_metadata[i]['is_nominal'] == True:
+            gain = gain_ratio_nominal(data_set, i)
+            if gain > maxm:
+                maxm = gain
+                attri = i
+        else:
+            gain, split = gain_ratio_numeric(data_set, i, numerical_splits_count)
+            if gain > maxm:
+                maxm = gain
+                attri = i
+
+    if maxm == 0.0:
+        return False, False
+    else if attribute_metadata[attri]['is_nominal'] == True:
+        return attri, False
+    else
+        return attri, split
 
 # # ======== Test Cases =============================
 # numerical_splits_count = [20,20]
