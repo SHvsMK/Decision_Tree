@@ -147,7 +147,7 @@ def entropy(data_set):
         pi = float(val) / total
         entropy_val += pi * math.log(pi, 2)
 
-    return -entropy_val
+    return - entropy_val
 
 
 # ======== Test case =============================
@@ -170,7 +170,34 @@ def gain_ratio_nominal(data_set, attribute):
     ========================================================================================================
     '''
     # Your code here
-    pass
+    IG = 0.0
+    IV = 0.0
+    IGR = 0.0
+    HEx = 0.0
+    H_sub_total = 0.0
+    total = len(data_set)
+
+    dict = {}
+
+    for data in data_set:
+        key = data[attribute]
+        dict[key] = 1
+
+    for key, _ in dict.items():
+        sub = [data for data in data_set if data[attribute] == key]
+        sub_total = len(sub)
+        H_sub = entropy(sub)
+        H_sub_total += H_sub * sub_total / total
+        piv = float(sub_total) / total
+        IV_sub = piv * math.log(piv, 2)
+        IV += IV_sub
+
+    HEx = entropy(data_set)
+    IG = HEx + H_sub_total
+    IV = - IV
+    IGR = IG / IV
+
+    return IGR
 # ======== Test case =============================
 # data_set, attr = [[1, 2], [1, 0], [1, 0], [0, 2], [0, 2], [0, 0], [1, 3], [0, 4], [0, 3], [1, 1]], 1
 # gain_ratio_nominal(data_set,attr) == 0.11470666361703151
@@ -195,7 +222,31 @@ def gain_ratio_numeric(data_set, attribute, steps):
     ========================================================================================================
     '''
     # Your code here
-    pass
+    IG = 0.0
+    IV = 0.0
+    IGR = 0.0
+    threshold = 0.0
+    HEx = 0.0
+    total = len(data_set)
+
+    HEx = entropy(data_set)
+
+    for i in range(total):
+        if i % steps == 0:
+            thresh = data_set[i][attribute]
+            sub1 = [data for data in data_set if data[attribute] < thresh]
+            sub2 = [data for data in data_set if data[attribute] >= thresh]]
+            IG = HEx - entropy(sub1) - entropy(sub2)
+            piv1 = float(len(sub1)) / total
+            piv2 = float(len(sub2)) / total
+            IV_sub1 = piv1 * math.log(piv1, 2)
+            IV_sub2 = piv2 * math.log(piv2, 2)
+            IV = - (IV_sub1 + IV_sub2)
+            if IG / IV > IGR:
+                IGR = IG / IV
+                threshold = thresh
+
+    return IGR, threshold
 # ======== Test case =============================
 # data_set,attr,step = [[1,0.05], [1,0.17], [1,0.64], [0,0.38], [0,0.19], [1,0.68], [1,0.69], [1,0.17], [1,0.4], [0,0.53]], 1, 2
 # gain_ratio_numeric(data_set,attr,step) == (0.21744375685031775, 0.64)
