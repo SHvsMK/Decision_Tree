@@ -83,9 +83,9 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
 
     if maxm == 0.0:
         return False, False
-    else if attribute_metadata[attri]['is_nominal'] == True:
+    elif attribute_metadata[attri]['is_nominal'] == True:
         return attri, False
-    else
+    else:
         return attri, split
 
 # # ======== Test Cases =============================
@@ -110,7 +110,6 @@ def mode(data_set):
     ========================================================================================================
     '''
     # Your code here
-    pass
 
     #Use a dictionary to save the count of possible classifications
     dict = {}
@@ -207,6 +206,8 @@ def gain_ratio_nominal(data_set, attribute):
 
     dict = split_on_nominal(data_set, attribute)
 
+    print dict
+
     for key, val in dict.items():
         sub = val
         sub_total = len(sub)
@@ -217,7 +218,7 @@ def gain_ratio_nominal(data_set, attribute):
         IV += IV_sub
 
     HEx = entropy(data_set)
-    IG = HEx + H_sub_total
+    IG = HEx - H_sub_total
     IV = - IV
     IGR = IG / IV
 
@@ -259,12 +260,21 @@ def gain_ratio_numeric(data_set, attribute, steps):
         if i % steps == 0:
             thresh = data_set[i][attribute]
             sub1, sub2 = split_on_numerical(data_set, attribute, thresh)
-            IG = HEx - entropy(sub1) - entropy(sub2)
+            IG = HEx - entropy(sub1) *len(sub1) / total - entropy(sub2) * len(sub2) / total
             piv1 = float(len(sub1)) / total
             piv2 = float(len(sub2)) / total
-            IV_sub1 = piv1 * math.log(piv1, 2)
-            IV_sub2 = piv2 * math.log(piv2, 2)
+            if piv1 == 0:
+                IV_sub1 = 0
+            else:
+                IV_sub1 = piv1 * math.log(piv1, 2)
+            if piv2 == 0:
+                IV_sub2 = 0
+            else:
+                IV_sub2 = piv2 * math.log(piv2, 2)
             IV = - (IV_sub1 + IV_sub2)
+            # print IV
+            if IV == 0:
+                continue
             if IG / IV > IGR:
                 IGR = IG / IV
                 threshold = thresh
