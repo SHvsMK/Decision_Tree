@@ -40,13 +40,10 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
 
     # split on best attribute
     splitting_attr, splitting_value = pick_best_attribute(data_set, attribute_metadata, numerical_splits_count)
+
     # avoid pass by reference error
     numerical_splits_count = list(numerical_splits_count)
     numerical_splits_count[splitting_attr] -= 1
-
-    # debug
-    if splitting_attr == 0:
-        print 'error: pick_best_attribute returns 0 as splitting_attr'
 
     # describe the node
     node.decision_attribute = splitting_attr
@@ -55,7 +52,7 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
     node.name = attribute_metadata[splitting_attr]['name']
 
     # if is nominal 
-    if not splitting_value:
+    if node.is_nominal:
         # put data in data_set into different branches
         branches = {}
         for data in data_set:
@@ -127,28 +124,27 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
     ========================================================================================================
     '''
     # Your code here
-    maxm = 0.0
-    attri = 0
-    split = 0.0
+    max_gain = float('-inf')
+    best_attr = -1
+    best_split = False
 
     for i in range(1, len(attribute_metadata)):
         if attribute_metadata[i]['is_nominal']:
             gain = gain_ratio_nominal(data_set, i)
-            if gain > maxm:
-                maxm = gain
-                attri = i
+            if gain > max_gain:
+                max_gain = gain
+                best_attr = i
         else:
             gain, split = gain_ratio_numeric(data_set, i, 1)
-            if gain > maxm:
-                maxm = gain
-                attri = i
+            if gain > max_gain:
+                max_gain = gain
+                best_attr = i
+                best_split = split
 
-    if maxm == 0.0:
-        return False, False
-    elif attribute_metadata[attri]['is_nominal'] == True:
-        return attri, False
-    else:
-        return attri, split
+    if best_attr == -1:
+        raise ValueError('invalid splitting attribute')
+                
+    return best_attr, best_split 
 
 # # ======== Test Cases =============================
 # numerical_splits_count = [20,20]
