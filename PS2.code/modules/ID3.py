@@ -51,7 +51,7 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
     node.splitting_value = splitting_value
     node.name = attribute_metadata[splitting_attr]['name']
 
-    # if is nominal 
+    # if is nominal
     if node.is_nominal:
         # put data in data_set into different branches
         branches = {}
@@ -73,7 +73,7 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
         node.children = []
         node.children.append(ID3(left_sub_data_set, attribute_metadata, numerical_splits_count, depth - 1))
         node.children.append(ID3(right_sub_data_set, attribute_metadata, numerical_splits_count, depth - 1))
-    
+
     # return the generated tree
     return node
 
@@ -97,7 +97,7 @@ def check_homogenous(data_set):
 
     #Compare every item's attribute with attr_val
     for data in data_set:
-        if data[0] != attr_val:
+        if data[0] != attr_val and data[0] != '?':
             return None
 
     #Return attr_val
@@ -143,8 +143,8 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
 
     if best_attr == -1:
         raise ValueError('invalid splitting attribute')
-                
-    return best_attr, best_split 
+
+    return best_attr, best_split
 
 # # ======== Test Cases =============================
 # numerical_splits_count = [20,20]
@@ -179,6 +179,8 @@ def mode(data_set):
     #Count the possible classifications
     for data in data_set:
         key = data[0]
+        if key == '?':
+            continue
         if dict.has_key(key):
             dict[key] +=1
         else:
@@ -263,8 +265,6 @@ def gain_ratio_nominal(data_set, attribute):
     total = len(data_set)
 
     dict = split_on_nominal(data_set, attribute)
-
-    print dict
 
     for key, val in dict.items():
         sub = val
@@ -387,8 +387,17 @@ def split_on_numerical(data_set, attribute, splitting_value):
     # Your code here
     split = {}
 
-    sub1 = [data for data in data_set if data[attribute] < splitting_value]
-    sub2 = [data for data in data_set if data[attribute] >= splitting_value]
+    missing_attribute = False
+
+    if sum(x[attribute] == '?' for x in data_set) != 0:
+        count_below_splitting_attr = reduce(lambda x, y: x + (y[a] < splitting_value), data_set, 0)
+        count_above_splitting_attr = reduce(lambda x, y: x + (y[a] >= splitting_value), data_set, 0)
+        if  count_below_splitting_attr < count_above_splitting_attr:
+            missing_attribute = True
+
+
+    sub1 = [data for data in data_set if data[attribute] < splitting_value or (not missing_attribute and data[attribute] == '?')]
+    sub2 = [data for data in data_set if data[attribute] >= splitting_value or (missing_attribute and data[attribute] == '?')]
     split = (sub1, sub2)
 
     return split
