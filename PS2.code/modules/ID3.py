@@ -42,6 +42,10 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
     i, split_value = pick_best_attribute(data_set, attribute_metadata, numerical_splits_count)
     numerical_splits_count[i] -= 1
 
+    # debug
+    if i == 0:
+        print 'pick_best_attribute is wrong'
+
     # describe the node
     node.decision_attribute = i
     node.is_nominal = (split_value == False)
