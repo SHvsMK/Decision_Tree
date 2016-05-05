@@ -16,9 +16,63 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
 
     '''
     # Your code here
-    if len(data_set) == 0:
-        return
-    pass
+
+    # decision tree to be returned
+    node = Node()
+
+    # base case
+    theta = 0.0 # threshold of entropy
+    if not data_set:
+        return node
+    elif depth == 0:
+        node.label = mode(data_set)
+        return node
+    elif check_homogenous(data_set):
+        node.label = data_set[0][0]
+        return node
+    # no attributes to split
+    elif numerical_splits_count[1:] == [0] * (len(numerical_splits_count) - 1):
+        node.label = mode(data_set)
+        return node
+    elif entropy(data_set) == theta:
+        node.label = mode(data_set)
+        return node
+
+    # split on best attribute
+    i, split_value = pick_best_attribute(data_set, attribute_metadata, numerical_splits_count)
+    numerical_splits_count[i] -= 1
+
+    # describe the node
+    node.decision_attribute = i
+    node.is_nominal = (split_value == False)
+    node.splitting_value = split_value
+    node.name = attribute_metadata[i]['name']
+
+    # if is nominal 
+    if not split_value:
+        # put data in data_set into different branches
+        branches = {}
+        for data in data_set:
+            if data[i] not in branches:
+                branches[data[i]] = []
+            branches[data[i]].append(data)
+        for attr, sub_data_set in branches.items():
+            node.children[attr] = ID3(sub_data_set, attribute_metadata, numerical_splits_count, depth - 1)
+    # else is numeric
+    else:
+        left_sub_data_set = []
+        right_sub_data_set = []
+        for data in data_set:
+            if data[i] < split_value:
+                left_sub_data_set.append(data)
+            else:
+                right_sub_data_set.append(data)
+        node.children = []
+        node.children.append(ID3(left_sub_data_set, attribute_metadata, numerical_splits_count, depth - 1))
+        node.children.append(ID3(right_sub_data_set, attribute_metadata, numerical_splits_count, depth - 1))
+    
+    # return the generated tree
+    return node
 
 def check_homogenous(data_set):
     '''
@@ -32,14 +86,16 @@ def check_homogenous(data_set):
      '''
     # Your code here
 
+    if not data_set:
+        return None
+
     #Load the attribute at index 0
     attr_val = data_set[0][0]
 
     #Compare every item's attribute with attr_val
     for data in data_set:
         if data[0] != attr_val:
-            attr_val = None
-            break
+            return None
 
     #Return attr_val
     return attr_val
@@ -76,7 +132,7 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
                 maxm = gain
                 attri = i
         else:
-            gain, split = gain_ratio_numeric(data_set, i, numerical_splits_count)
+            gain, split = gain_ratio_numeric(data_set, i, 1)
             if gain > maxm:
                 maxm = gain
                 attri = i
@@ -91,7 +147,7 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
 # # ======== Test Cases =============================
 # numerical_splits_count = [20,20]
 # attribute_metadata = [{'name': "winner",'is_nominal': True},{'name': "opprundifferential",'is_nominal': False}]
-# data_set = [[1, 0.27], [0, 0.42], [0, 0.86], [0, 0.68], [0, 0.04], [1, 0.01], [1, 0.33], [1, 0.42], [0, 0.51], [1, 0.4]]
+# data_set = [[1, 0.27]  [0, 0.42], [0, 0.86], [0, 0.68], [0, 0.04], [1, 0.01], [1, 0.33], [1, 0.42], [0, 0.51], [1, 0.4]]
 # pick_best_attribute(data_set, attribute_metadata, numerical_splits_count) == (1, 0.51)
 # attribute_metadata = [{'name': "winner",'is_nominal': True},{'name': "weather",'is_nominal': True}]
 # data_set = [[0, 0], [1, 0], [0, 2], [0, 2], [0, 3], [1, 1], [0, 4], [0, 2], [1, 2], [1, 5]]
@@ -257,7 +313,7 @@ def gain_ratio_numeric(data_set, attribute, steps):
     HEx = entropy(data_set)
 
     for i in range(total):
-        if i % steps == 0:
+        if (i % steps) == 0:
             thresh = data_set[i][attribute]
             sub1, sub2 = split_on_numerical(data_set, attribute, thresh)
             IG = HEx - entropy(sub1) *len(sub1) / total - entropy(sub2) * len(sub2) / total
