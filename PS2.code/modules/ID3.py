@@ -39,27 +39,29 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
         return node
 
     # split on best attribute
-    i, split_value = pick_best_attribute(data_set, attribute_metadata, numerical_splits_count)
-    numerical_splits_count[i] -= 1
+    splitting_attr, splitting_value = pick_best_attribute(data_set, attribute_metadata, numerical_splits_count)
+    # avoid pass by reference error
+    numerical_splits_count = list(numerical_splits_count)
+    numerical_splits_count[splitting_attr] -= 1
 
     # debug
-    if i == 0:
-        print 'pick_best_attribute is wrong'
+    if splitting_attr == 0:
+        print 'error: pick_best_attribute returns 0 as splitting_attr'
 
     # describe the node
-    node.decision_attribute = i
-    node.is_nominal = (split_value == False)
-    node.splitting_value = split_value
-    node.name = attribute_metadata[i]['name']
+    node.decision_attribute = splitting_attr
+    node.is_nominal = attribute_metadata[splitting_attr]['is_nominal']
+    node.splitting_value = splitting_value
+    node.name = attribute_metadata[splitting_attr]['name']
 
     # if is nominal 
-    if not split_value:
+    if not splitting_value:
         # put data in data_set into different branches
         branches = {}
         for data in data_set:
-            if data[i] not in branches:
-                branches[data[i]] = []
-            branches[data[i]].append(data)
+            if data[splitting_attr] not in branches:
+                branches[data[splitting_attr]] = []
+            branches[data[splitting_attr]].append(data)
         for attr, sub_data_set in branches.items():
             node.children[attr] = ID3(sub_data_set, attribute_metadata, numerical_splits_count, depth - 1)
     # else is numeric
@@ -67,7 +69,7 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
         left_sub_data_set = []
         right_sub_data_set = []
         for data in data_set:
-            if data[i] < split_value:
+            if data[splitting_attr] < splitting_value:
                 left_sub_data_set.append(data)
             else:
                 right_sub_data_set.append(data)
@@ -130,7 +132,7 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
     split = 0.0
 
     for i in range(1, len(attribute_metadata)):
-        if attribute_metadata[i]['is_nominal'] == True:
+        if attribute_metadata[i]['is_nominal']:
             gain = gain_ratio_nominal(data_set, i)
             if gain > maxm:
                 maxm = gain
