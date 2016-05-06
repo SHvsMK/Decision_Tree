@@ -129,6 +129,8 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
     best_split = False
 
     for i in range(1, len(attribute_metadata)):
+        if numerical_splits_count[i] == 0:
+            continue
         if attribute_metadata[i]['is_nominal']:
             gain = gain_ratio_nominal(data_set, i)
             if gain > max_gain:
