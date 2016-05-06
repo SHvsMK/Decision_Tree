@@ -15,3 +15,11 @@ def create_predictions(tree, predict):
     Given a tree and a url to a data_set. Create a csv with a prediction for each result
     using the classify method in node class.
     '''
+    predict_set, _ = parse(predict, True)
+    csvfile = open('PS2.csv', 'wb')
+    csvwriter = csv.writer(csvfile, delimiter=',')
+    for data in predict_set:
+        # note that label has been rotated to the 0 index
+        data[0] = tree.classify(data)
+        csvwriter.writerow(data[1:] + [data[0]])
+    csvfile.close()

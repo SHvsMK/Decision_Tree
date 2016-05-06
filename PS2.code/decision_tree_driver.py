@@ -11,18 +11,21 @@ from modules.predictions import *
 #   options can be found in README.md
 
 options = {
-    'train' : 'data/btrain.csv',
-    'validate': 'data/bvalidate.csv',
-    'predict': 'data/btest.csv',
+    # 'train' : 'data/btrain.csv',
+    # 'validate': 'data/bvalidate.csv',
+    # 'predict': 'data/btest.csv',
+    'train' : 'data/test_btrain.csv',
+    'validate': 'data/test_bvalidate.csv',
+    # 'predict': 'data/test_btest.csv',
     'limit_splits_on_numerical': 5,
     'limit_depth': 20,
     'print_tree': True,
     'print_dnf' : False,
-    'prune' : 'data/bvalidate.csv',
-    'learning_curve' : {
-        'upper_bound' : 0.05,
-        'increment' : 0.001
-    }
+    # 'prune' : 'data/bvalidate.csv',
+    # 'learning_curve' : {
+    #     'upper_bound' : 0.05,
+    #     'increment' : 0.001
+    # }
 }
 
 def decision_tree_driver(train, validate = False, predict = False, prune = False,
