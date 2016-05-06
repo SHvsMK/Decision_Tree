@@ -24,6 +24,6 @@ def validation_accuracy(tree,validation_set):
     correct_count = 0
     for data in validation_set:
         if tree.classify(data) == data[0]:
-            count += 1
+            correct_count += 1
 
     return correct_count / float(len(validation_set))
