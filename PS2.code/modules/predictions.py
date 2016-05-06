@@ -16,7 +16,7 @@ def create_predictions(tree, predict):
     using the classify method in node class.
     '''
     predict_set, _ = parse(predict, True)
-    csvfile = open('PS2.csv', 'wb')
+    csvfile = open('output/PS2.csv', 'wb')
     csvwriter = csv.writer(csvfile, delimiter=',')
     for data in predict_set:
         # note that label has been rotated to the 0 index
