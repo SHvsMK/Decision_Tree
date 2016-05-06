@@ -277,6 +277,9 @@ def gain_ratio_nominal(data_set, attribute):
         IV_sub = piv * math.log(piv, 2)
         IV += IV_sub
 
+    if IV == 0:
+        return float('inf')
+
     HEx = entropy(data_set)
     IG = HEx - H_sub_total
     IV = - IV
