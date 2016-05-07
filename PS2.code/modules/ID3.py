@@ -274,7 +274,10 @@ def gain_ratio_nominal(data_set, attribute):
         H_sub = entropy(sub)
         H_sub_total += H_sub * sub_total / total
         piv = float(sub_total) / total
-        IV_sub = piv * math.log(piv, 2)
+        if piv == 0:
+            IV_sub = 0
+        else:
+            IV_sub = piv * math.log(piv, 2)
         IV += IV_sub
 
     if IV == 0:

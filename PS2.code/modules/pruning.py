@@ -13,8 +13,47 @@ def reduced_error_pruning(root,training_set,validation_set):
     NOTE you will probably not need to use the training set for your pruning strategy, but it's passed as an argument in the starter code just in case.
     '''
     # Your code here
-    pass
-# 
+    if len(root.children) == 0
+        return
+
+    flag = True
+
+    if root.is_nominal:
+        for attr, child in root.children:
+            if child.label == None:
+                new_training_set = [data[root.decision_attribute] == attr for data in training_set]
+                new_validation_set = [data[root.decision_attribute] == attr for data in validation_set]
+                reduced_error_pruning(child, new_training_set, new_validation_set)
+
+
+        for attr, child in root.children:
+            if child.label == None:
+                flag = False
+                break
+
+    else:
+        if root.children[0].label == None:
+            new_training_set = [data[root.decision_attribute] < root.splitting_value for data in training_set]
+            new_validation_set = [data[root.decision_attribute] < root.splitting_value for data in validation_set]
+            reduced_error_pruning(root.children[0], new_training_set, new_validation_set)
+
+        if root.children[1].label == None:
+            new_training_set = [data[root.decision_attribute] >= root.splitting_value for data in training_set]
+            new_validation_set = [data[root.decision_attribute] >= root.splitting_value for data in validation_set]
+            reduced_error_pruning(root.children[1], new_training_set, new_validation_set)
+
+        if root.children[0].label == None or root.children[1].lable == None:
+            flag = False
+
+    if flag:
+        old_accuracy = validation_accuracy(root, validation_set)
+        new_label = (sum(data[0] == 0 for data in training_set) > sum(data[0] == 1 for data in training_set)) ? 0 : 1
+        new_accuracy = sum(data[0] == new_label for data in validation_set) / len(validation_set)
+        if new_accuracy >= old_accuracy:
+            root.label = new_label
+            root.children = {}
+
+#
 
 def validation_accuracy(tree,validation_set):
     '''
