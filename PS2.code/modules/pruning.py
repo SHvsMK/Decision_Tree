@@ -21,8 +21,8 @@ def reduced_error_pruning(root,training_set,validation_set):
     if root.is_nominal:
         for attr, child in root.children:
             if child.label == None:
-                new_training_set = [data[root.decision_attribute] == attr for data in training_set]
-                new_validation_set = [data[root.decision_attribute] == attr for data in validation_set]
+                new_training_set = [data for data in training_set if data[root.decision_attribute] == attr]
+                new_validation_set = [data for data in validation_set if data[root.decision_attribute] == attr]
                 reduced_error_pruning(child, new_training_set, new_validation_set)
 
 
@@ -33,13 +33,13 @@ def reduced_error_pruning(root,training_set,validation_set):
 
     else:
         if root.children[0].label == None:
-            new_training_set = [data[root.decision_attribute] < root.splitting_value for data in training_set]
-            new_validation_set = [data[root.decision_attribute] < root.splitting_value for data in validation_set]
+            new_training_set = [data for data in training_set if data[root.decision_attribute] < root.splitting_value]
+            new_validation_set = [data for data in validation_set if data[root.decision_attribute] < root.splitting_value]
             reduced_error_pruning(root.children[0], new_training_set, new_validation_set)
 
         if root.children[1].label == None:
-            new_training_set = [data[root.decision_attribute] >= root.splitting_value for data in training_set]
-            new_validation_set = [data[root.decision_attribute] >= root.splitting_value for data in validation_set]
+            new_training_set = [data for data in training_set if data[root.decision_attribute] >= root.splitting_value]
+            new_validation_set = [data for data in validation_set if data[root.decision_attribute] >= root.splitting_value]
             reduced_error_pruning(root.children[1], new_training_set, new_validation_set)
 
         if root.children[0].label == None or root.children[1].lable == None:
