@@ -44,7 +44,11 @@ class Node:
             return self.label
 
         if self.is_nominal:
-            return self.children[instance[self.decision_attribute]].classify(instance)
+            if self.children.has_key(instance[self.decision_attribute]):
+                return self.children[instance[self.decision_attribute]].classify(instance)
+            else:
+                # self.value store the mode of a non-leaf node
+                return self.value
         else:
             if instance[self.decision_attribute] < self.splitting_value:
                 return self.children[0].classify(instance)

@@ -28,9 +28,7 @@ options = {
     # }
 }
 
-def decision_tree_driver(train, validate = False, predict = False, prune = False,
-    limit_splits_on_numerical = False, limit_depth = False, print_tree = False,
-    print_dnf = False, learning_curve = False):
+def decision_tree_driver(train, validate = False, predict = False, prune = False, limit_splits_on_numerical = False, limit_depth = False, print_tree = False, print_dnf = False, learning_curve = False):
     
     train_set, attribute_metadata = parse(train, False)
     if limit_splits_on_numerical != False:

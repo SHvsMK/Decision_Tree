@@ -13,47 +13,34 @@ def reduced_error_pruning(root,training_set,validation_set):
     NOTE you will probably not need to use the training set for your pruning strategy, but it's passed as an argument in the starter code just in case.
     '''
     # Your code here
-    if len(root.children) == 0
+    # if is leaf node
+    if not root.label:
         return
 
-    flag = True
-
+    # if not leaf node
+    # traverse to the leaf node (to do the pruning from leaf node)
     if root.is_nominal:
         for attr, child in root.children:
-            if child.label == None:
-                new_training_set = [data for data in training_set if data[root.decision_attribute] == attr]
-                new_validation_set = [data for data in validation_set if data[root.decision_attribute] == attr]
-                reduced_error_pruning(child, new_training_set, new_validation_set)
-
-
-        for attr, child in root.children:
-            if child.label == None:
-                flag = False
-                break
-
+            new_training_set = [data for data in training_set if data[root.decision_attribute] == attr]
+            new_validation_set = [data for data in validation_set if data[root.decision_attribute] == attr]
+            reduced_error_pruning(child, new_training_set, new_validation_set)
     else:
-        if root.children[0].label == None:
-            new_training_set = [data for data in training_set if data[root.decision_attribute] < root.splitting_value]
-            new_validation_set = [data for data in validation_set if data[root.decision_attribute] < root.splitting_value]
-            reduced_error_pruning(root.children[0], new_training_set, new_validation_set)
+        # left child
+        new_training_set = [data for data in training_set if data[root.decision_attribute] < root.splitting_value]
+        new_validation_set = [data for data in validation_set if data[root.decision_attribute] < root.splitting_value]
+        reduced_error_pruning(root.children[0], new_training_set, new_validation_set)
+        # right child
+        new_training_set = [data for data in training_set if data[root.decision_attribute] >= root.splitting_value]
+        new_validation_set = [data for data in validation_set if data[root.decision_attribute] >= root.splitting_value]
+        reduced_error_pruning(root.children[1], new_training_set, new_validation_set)
 
-        if root.children[1].label == None:
-            new_training_set = [data for data in training_set if data[root.decision_attribute] >= root.splitting_value]
-            new_validation_set = [data for data in validation_set if data[root.decision_attribute] >= root.splitting_value]
-            reduced_error_pruning(root.children[1], new_training_set, new_validation_set)
-
-        if root.children[0].label == None or root.children[1].lable == None:
-            flag = False
-
-    if flag:
-        old_accuracy = validation_accuracy(root, validation_set)
-        new_label = (sum(data[0] == 0 for data in training_set) > sum(data[0] == 1 for data in training_set)) ? 0 : 1
-        new_accuracy = sum(data[0] == new_label for data in validation_set) / len(validation_set)
-        if new_accuracy >= old_accuracy:
-            root.label = new_label
-            root.children = {}
-
-#
+    # pruning
+    unpruned_accuracy = validation_accuracy(root, validation_set)
+    new_label = mode(validate_set)
+    pruned_accuracy = sum(data[0] == new_label for data in validation_set) / len(validation_set)
+    if pruned_accuracy >= unpruned_accuracy:
+        root.label = new_label
+        root.children = {}
 
 def validation_accuracy(tree,validation_set):
     '''

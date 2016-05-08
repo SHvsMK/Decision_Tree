@@ -50,6 +50,7 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
     node.is_nominal = attribute_metadata[splitting_attr]['is_nominal']
     node.splitting_value = splitting_value
     node.name = attribute_metadata[splitting_attr]['name']
+    node.value = mode(data_set) # value store mode of non-leaf node
 
     # if is nominal
     if node.is_nominal:
