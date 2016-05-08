@@ -19,9 +19,10 @@ options = {
     'predict': 'data/test_btest.csv',
     'limit_splits_on_numerical': 5,
     'limit_depth': 20,
-    'print_tree': False,
+    # 'print_tree': True,
     'print_dnf' : True,
     # 'prune' : 'data/bvalidate.csv',
+    'prune' : 'data/test_bvalidate.csv',
     # 'learning_curve' : {
     #     'upper_bound' : 0.05,
     #     'increment' : 0.001

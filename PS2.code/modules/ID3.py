@@ -39,17 +39,17 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
         return node
 
     # split on best attribute
-    splitting_attr, splitting_value = pick_best_attribute(data_set, attribute_metadata, numerical_splits_count)
+    decision_attr, splitting_value = pick_best_attribute(data_set, attribute_metadata, numerical_splits_count)
 
     # avoid pass by reference error
     numerical_splits_count = list(numerical_splits_count)
-    numerical_splits_count[splitting_attr] -= 1
+    numerical_splits_count[decision_attr] -= 1
 
     # describe the node
-    node.decision_attribute = splitting_attr
-    node.is_nominal = attribute_metadata[splitting_attr]['is_nominal']
+    node.decision_attribute = decision_attr
+    node.is_nominal = attribute_metadata[decision_attr]['is_nominal']
     node.splitting_value = splitting_value
-    node.name = attribute_metadata[splitting_attr]['name']
+    node.name = attribute_metadata[decision_attr]['name']
     node.value = mode(data_set) # value store mode of non-leaf node
 
     # if is nominal
@@ -57,9 +57,9 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
         # put data in data_set into different branches
         branches = {}
         for data in data_set:
-            if data[splitting_attr] not in branches:
-                branches[data[splitting_attr]] = []
-            branches[data[splitting_attr]].append(data)
+            if data[decision_attr] not in branches:
+                branches[data[decision_attr]] = []
+            branches[data[decision_attr]].append(data)
         for attr, sub_data_set in branches.items():
             node.children[attr] = ID3(sub_data_set, attribute_metadata, numerical_splits_count, depth - 1)
     # else is numeric
@@ -67,7 +67,7 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
         left_sub_data_set = []
         right_sub_data_set = []
         for data in data_set:
-            if data[splitting_attr] < splitting_value:
+            if data[decision_attr] < splitting_value:
                 left_sub_data_set.append(data)
             else:
                 right_sub_data_set.append(data)

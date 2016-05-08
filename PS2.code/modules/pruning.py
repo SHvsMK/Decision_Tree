@@ -14,13 +14,16 @@ def reduced_error_pruning(root,training_set,validation_set):
     '''
     # Your code here
     # if is leaf node
-    if not root.label:
+    if not root.children:
         return
 
-    # if not leaf node
+    # if no validation set for pruning
+    if not validation_set:
+        return
+
     # traverse to the leaf node (to do the pruning from leaf node)
     if root.is_nominal:
-        for attr, child in root.children:
+        for attr, child in root.children.items():
             new_training_set = [data for data in training_set if data[root.decision_attribute] == attr]
             new_validation_set = [data for data in validation_set if data[root.decision_attribute] == attr]
             reduced_error_pruning(child, new_training_set, new_validation_set)
@@ -36,7 +39,7 @@ def reduced_error_pruning(root,training_set,validation_set):
 
     # pruning
     unpruned_accuracy = validation_accuracy(root, validation_set)
-    new_label = mode(validate_set)
+    new_label = mode(validation_set)
     pruned_accuracy = sum(data[0] == new_label for data in validation_set) / len(validation_set)
     if pruned_accuracy >= unpruned_accuracy:
         root.label = new_label

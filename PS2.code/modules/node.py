@@ -82,7 +82,10 @@ def dfs(node):
     elif node.label == 0:
         return None
 
+    # store the paths
     paths = []
+
+    # if is nominal
     if node.is_nominal:
         for attr_val, child in node.children.items():
             sub_paths = dfs(child)
@@ -91,15 +94,20 @@ def dfs(node):
             for path in sub_paths:
                 path.insert(0, ''.join([node.name, '=', str(attr_val)]))
                 paths.append(path)
+    # if is numeric
     else:
+        # left child
         sub_paths = dfs(node.children[0])
         if sub_paths:
             for path in sub_paths:
+                # insert the decision attribute and splitting value in the beginning of the path
                 path.insert(0, ''.join([node.name, '<', str(node.splitting_value)]))
                 paths.append(path)
+        # right child
         sub_paths = dfs(node.children[1])
         if sub_paths:
             for path in sub_paths:
+                # insert the decision attribute and splitting value in the beginning of the path
                 path.insert(0, ''.join([node.name, '>=', str(node.splitting_value)]))
                 paths.append(path)
 
