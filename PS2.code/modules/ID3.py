@@ -23,6 +23,7 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
     # base case
     theta = 0.0 # threshold of entropy
     if not data_set:
+        node.label = 0
         return node
     elif depth == 0:
         node.label = mode(data_set)
@@ -50,27 +51,43 @@ def ID3(data_set, attribute_metadata, numerical_splits_count, depth):
     node.is_nominal = attribute_metadata[decision_attr]['is_nominal']
     node.splitting_value = splitting_value
     node.name = attribute_metadata[decision_attr]['name']
-    node.value = mode(data_set) # value store mode of non-leaf node
+    node.value['mode'] = mode(data_set)
 
-    # if is nominal
+    # generate branches and decision trees
     if node.is_nominal:
-        # put data in data_set into different branches
+        # split data
         branches = {}
         for data in data_set:
             if data[decision_attr] not in branches:
                 branches[data[decision_attr]] = []
             branches[data[decision_attr]].append(data)
-        for attr, sub_data_set in branches.items():
-            node.children[attr] = ID3(sub_data_set, attribute_metadata, numerical_splits_count, depth - 1)
-    # else is numeric
+        # generate decision for subtrees
+        for key, branch in branches.items():
+            node.children[key] = ID3(branch, attribute_metadata, numerical_splits_count, depth - 1)
     else:
         left_sub_data_set = []
         right_sub_data_set = []
-        for data in data_set:
+        missing_data_indices = []
+        for i in range(len(data_set)):
+            data = data_set[i]
+            # if missing attribute, save its index
+            if not data[decision_attr]:
+                missing_data_indices.append(i)
+                continue
+            # split good data
             if data[decision_attr] < splitting_value:
                 left_sub_data_set.append(data)
             else:
                 right_sub_data_set.append(data)
+        # save the average value of majority
+        sub_data_set = left_sub_data_set if len(left_sub_data_set) > len(right_sub_data_set) else right_sub_data_set
+        node.value['majority_attr_val'] = sum(data[decision_attr] for data in sub_data_set)
+        # split those data with missing attribute to the majority
+        # assign average value of majority to missing attribute
+        for i in missing_data_indices:
+            data_set[i][decision_attr] = node.value['majority_attr_val']
+            sub_data_set.append(data_set[i])
+        # generate decision tree on subtree
         node.children = []
         node.children.append(ID3(left_sub_data_set, attribute_metadata, numerical_splits_count, depth - 1))
         node.children.append(ID3(right_sub_data_set, attribute_metadata, numerical_splits_count, depth - 1))
@@ -101,7 +118,6 @@ def check_homogenous(data_set):
         if data[0] != attr_val and data[0] != '?':
             return None
 
-    #Return attr_val
     return attr_val
 # ======== Test Cases =============================
 # data_set = [[0],[1],[1],[1],[1],[1]]
@@ -126,7 +142,7 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
     '''
     # Your code here
     max_gain = float('-inf')
-    best_attr = -1
+    best_attr = None
     best_split = False
 
     for i in range(1, len(attribute_metadata)):
@@ -144,7 +160,7 @@ def pick_best_attribute(data_set, attribute_metadata, numerical_splits_count):
                 best_attr = i
                 best_split = split
 
-    if best_attr == -1:
+    if best_attr == None:
         raise ValueError('invalid splitting attribute')
 
     return best_attr, best_split
@@ -286,7 +302,7 @@ def gain_ratio_nominal(data_set, attribute):
 
     HEx = entropy(data_set)
     IG = HEx - H_sub_total
-    IV = - IV
+    IV = -IV
     IGR = IG / IV
 
     return IGR
@@ -404,12 +420,10 @@ def split_on_numerical(data_set, attribute, splitting_value):
         if  count_below_splitting_attr < count_above_splitting_attr:
             missing_attribute = True
 
+    sub1 = [data for data in data_set if data[attribute] < splitting_value or (not missing_attribute and data[attribute] == None)]
+    sub2 = [data for data in data_set if data[attribute] >= splitting_value or (missing_attribute and data[attribute] == None)]
 
-    sub1 = [data for data in data_set if data[attribute] < splitting_value or (not missing_attribute and data[attribute] == '?')]
-    sub2 = [data for data in data_set if data[attribute] >= splitting_value or (missing_attribute and data[attribute] == '?')]
-    split = (sub1, sub2)
-
-    return split
+    return (sub1, sub2) 
 # ======== Test case =============================
 # d_set,a,sval = [[1, 0.25], [1, 0.89], [0, 0.93], [0, 0.48], [1, 0.19], [1, 0.49], [0, 0.6], [0, 0.6], [1, 0.34], [1, 0.19]],1,0.48
 # split_on_numerical(d_set,a,sval) == ([[1, 0.25], [1, 0.19], [1, 0.34], [1, 0.19]],[[1, 0.89], [0, 0.93], [0, 0.48], [1, 0.49], [0, 0.6], [0, 0.6]])

@@ -14,7 +14,8 @@
 #
 # is_nominal - is the decision attribute nominal
 #
-# value - Ignore (not used, output class if any goes in label)
+# value - value['mode'] stores the mode of current node
+#         value['majority_attr_val'] stores the value of majority
 #
 # splitting_value - if numeric, where to split
 #
@@ -26,7 +27,7 @@ class Node:
         self.label = None
         self.decision_attribute = None
         self.is_nominal = None
-        self.value = None
+        self.value = {}
         self.splitting_value = None
         self.children = {}
         self.name = None
@@ -37,7 +38,7 @@ class Node:
         '''
 	# Your code here
 
-        # instance is actually an entry of data_set
+        # note: instance is actually an entry of data_set
 
         # if the node is leaf node, return the label
         if self.label != None:
@@ -47,9 +48,14 @@ class Node:
             if self.children.has_key(instance[self.decision_attribute]):
                 return self.children[instance[self.decision_attribute]].classify(instance)
             else:
-                # self.value store the mode of a non-leaf node
-                return self.value
+                return self.value['mode']
         else:
+            # if has missing attribute
+            # assign the attribute value to be the value of majority
+            # which is same as what we do when splitting data set
+            if not instance[self.decision_attribute]:
+                instance[self.decision_attribute] = self.value['majority_attr_val']
+
             if instance[self.decision_attribute] < self.splitting_value:
                 return self.children[0].classify(instance)
             else:
@@ -83,9 +89,11 @@ def dfs(node):
         return None
 
     # store the paths
+    if not node.decision_attribute:
+        raise ValueError('do not exist decision attribute in a non-leaf node')
+
     paths = []
 
-    # if is nominal
     if node.is_nominal:
         for attr_val, child in node.children.items():
             sub_paths = dfs(child)
@@ -94,7 +102,7 @@ def dfs(node):
             for path in sub_paths:
                 path.insert(0, ''.join([node.name, '=', str(attr_val)]))
                 paths.append(path)
-    # if is numeric
+
     else:
         # left child
         sub_paths = dfs(node.children[0])

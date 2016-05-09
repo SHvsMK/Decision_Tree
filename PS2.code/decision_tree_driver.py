@@ -23,10 +23,10 @@ options = {
     'print_dnf' : True,
     # 'prune' : 'data/bvalidate.csv',
     'prune' : 'data/test_bvalidate.csv',
-    # 'learning_curve' : {
-    #     'upper_bound' : 0.05,
-    #     'increment' : 0.001
-    # }
+    'learning_curve' : {
+        'upper_bound' : 0.05,
+        'increment' : 0.001
+    }
 }
 
 def decision_tree_driver(train, validate = False, predict = False, prune = False, limit_splits_on_numerical = False, limit_depth = False, print_tree = False, print_dnf = False, learning_curve = False):
