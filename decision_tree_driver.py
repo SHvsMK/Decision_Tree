@@ -11,32 +11,44 @@ from modules.predictions import *
 #   options can be found in README.md
 
 options = {
-    # 'train' : 'data/btrain.csv',
-    # 'validate': 'data/bvalidate.csv',
-    # 'predict': 'data/btest.csv',
-    'train' : 'data/test_btrain.csv',
-    'validate': 'data/test_bvalidate.csv',
-    'predict': 'data/test_btest.csv',
+    'train' : 'data/btrain.csv',
+    'validate': 'data/bvalidate.csv',
+    'predict': 'data/btest.csv',
+    # 'train' : 'data/test_btrain.csv',
+    # 'validate': 'data/test_bvalidate.csv',
+    # 'predict': 'data/test_btest.csv',
     'limit_splits_on_numerical': 5,
     'limit_depth': 20,
     # 'print_tree': True,
     'print_dnf' : True,
-    # 'prune' : 'data/bvalidate.csv',
-    'prune' : 'data/test_bvalidate.csv',
+    'prune' : 'data/bvalidate.csv',
+    # 'prune' : 'data/test_bvalidate.csv',
     'learning_curve' : {
-        'upper_bound' : 0.05,
-        'increment' : 0.001
+        'upper_bound' : 1,
+        'increment' : 0.1
     }
 }
 
+def count_tree(root):
+    if root.label != None:
+        return 1
+    count = 0
+    if root.is_nominal:
+        for _, child in root.children.items():
+            count += count_tree(child)
+        count += 1
+    else:
+        count = 1 + count_tree(root.children[0]) + count_tree(root.children[1])
+    return count
+
 def decision_tree_driver(train, validate = False, predict = False, prune = False, limit_splits_on_numerical = False, limit_depth = False, print_tree = False, print_dnf = False, learning_curve = False):
-    
+
     train_set, attribute_metadata = parse(train, False)
     if limit_splits_on_numerical != False:
         numerical_splits_count = [limit_splits_on_numerical] * len(attribute_metadata)
     else:
         numerical_splits_count = [float("inf")] * len(attribute_metadata)
-        
+
     if limit_depth != False:
         depth = limit_depth
     else:
@@ -46,6 +58,9 @@ def decision_tree_driver(train, validate = False, predict = False, prune = False
 
     # call the ID3 classification algorithm with the appropriate options
     tree = ID3(train_set, attribute_metadata, numerical_splits_count, depth)
+    unpruned_tree_num = count_tree(tree)
+    print 'unpruned_tree_num is:'
+    print unpruned_tree_num
     print '\n'
 
     # call reduced error pruning using the pruning set
@@ -53,6 +68,9 @@ def decision_tree_driver(train, validate = False, predict = False, prune = False
         print '###\n#  Pruning\n###'
         pruning_set, _ = parse(prune, False)
         reduced_error_pruning(tree,train_set,pruning_set)
+        pruned_tree_num = count_tree(tree)
+        print 'pruned_tree_num is:'
+        print pruned_tree_num
         print ''
 
     # print tree visually
@@ -91,7 +109,7 @@ def decision_tree_driver(train, validate = False, predict = False, prune = False
     if learning_curve and validate:
         print '###\n#  Generating Learning Curve\n###'
         iterations = 20 # number of times to test each size
-        get_graph(train_set, attribute_metadata, validate_set, 
+        get_graph(train_set, attribute_metadata, validate_set,
             numerical_splits_count, depth, 5, 0, learning_curve['upper_bound'],
             learning_curve['increment'])
         print ''

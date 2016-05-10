@@ -1,0 +1,23 @@
+###
+#  Training Tree
+###
+
+
+###
+#  Decision Tree as DNF
+###
+Decision Tree written to /output/DNF
+
+###
+#  Validating
+###
+Accuracy on validation set: 0.887710084034
+
+###
+#  Generating Predictions on Test Set
+###
+
+###
+#  Generating Learning Curve
+###
+
